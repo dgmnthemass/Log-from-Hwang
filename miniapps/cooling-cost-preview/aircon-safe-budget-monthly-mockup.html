@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>냉방비 미리보기 월간 관리 목업</title>
+  <style>
+    :root {
+      --blue: #0064FF;
+      --blue-dark: #0064FF;
+      --blue-soft: #e8f3ff;
+      --text: #191f28;
+      --muted: #6b7684;
+      --line: #e5e8eb;
+      --bg: #f2f4f6;
+      --card: #ffffff;
+      --safe: #8bc53f;
+      --normal: #d8ef42;
+      --warn: #f8a431;
+      --danger: #ef3328;
+      --shadow: 0 18px 48px rgba(25, 31, 40, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .workspace {
+      min-height: 100vh;
+      width: min(1148px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 418px;
+      gap: 36px;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .brief {
+      max-width: 640px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+      font-size: 13px;
+      font-weight: 900;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(38px, 5vw, 62px);
+      line-height: 1.08;
+    }
+
+    .brief p {
+      margin: 18px 0 0;
+      color: #3d4753;
+      font-size: 19px;
+      line-height: 1.65;
+      font-weight: 650;
+    }
+
+    .brief-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 28px;
+    }
+
+    .brief-card {
+      padding: 14px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      color: #334155;
+      font-size: 14px;
+      line-height: 1.4;
+      font-weight: 850;
+      box-shadow: 0 8px 20px rgba(25, 31, 40, 0.05);
+    }
+
+    .phone {
+      width: min(418px, 100%);
+      margin-left: auto;
+      padding: 14px;
+      border-radius: 34px;
+      background: #101828;
+      box-shadow: var(--shadow);
+    }
+
+    .screen {
+      height: 845px;
+      border-radius: 25px;
+      background: var(--card);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .status {
+      height: 28px;
+      flex: 0 0 auto;
+      background: #ffffff;
+    }
+
+    .app {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+    }
+
+    .app.welcome-mode {
+      padding: 0;
+    }
+
+    .app.welcome-mode .topbar {
+      display: none;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex: 0 0 auto;
+    }
+
+    .brand {
+      font-size: 18px;
+      font-weight: 950;
+    }
+
+    .mini-action {
+      min-height: 30px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 999px;
+      background: #f2f4f6;
+      color: #4e5968;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .view {
+      display: none;
+      min-height: 0;
+      flex: 1;
+    }
+
+    .view.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .welcome-view {
+      min-height: 0;
+      flex: 1;
+      justify-content: space-between;
+      padding: 0 26px 28px;
+      background: radial-gradient(circle at 90% 7%, #edf5ff 0, rgba(237, 245, 255, 0) 28%),
+        radial-gradient(circle at 18% 72%, #f1f5ff 0, rgba(241, 245, 255, 0) 32%),
+        #ffffff;
+    }
+
+    .welcome-hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding-top: 24px;
+    }
+
+    .welcome-icon {
+      width: 88px;
+      height: 88px;
+      border-radius: 26px;
+      border: 1px solid #edf0f3;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #58a6f6;
+      font-size: 42px;
+      line-height: 1;
+      box-shadow: 0 10px 30px rgba(25, 31, 40, 0.08);
+      margin-bottom: 42px;
+    }
+
+    .welcome-title {
+      margin: 0;
+      color: #031127;
+      font-size: 29px;
+      line-height: 1.32;
+      font-weight: 950;
+    }
+
+    .welcome-copy {
+      margin: 26px 0 0;
+      color: #6b7684;
+      font-size: 18px;
+      line-height: 1.75;
+      font-weight: 650;
+    }
+
+    .scroll {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding-bottom: 12px;
+    }
+
+    .question {
+      margin: 2px 0 8px;
+      font-size: 21px;
+      line-height: 1.28;
+      font-weight: 950;
+    }
+
+    .subcopy {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      font-weight: 650;
+    }
+
+    .section {
+      margin-top: 17px;
+    }
+
+    .setup-average {
+      margin-top: 22px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f2f4f6;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      color: #333d4b;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .section-title small {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .chips {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .chips.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .chips .chip.wide {
+      grid-column: 1 / -1;
+    }
+
+    .chip {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      color: #333d4b;
+      font-size: 12px;
+      font-weight: 850;
+      transition: 0.15s ease;
+    }
+
+    .chip.selected {
+      border-color: var(--blue);
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+      box-shadow: inset 0 0 0 1px var(--blue);
+    }
+
+    .chip.ghost {
+      background: #f2f4f6;
+      color: #6b7684;
+      border-color: #edf0f3;
+    }
+
+    .custom-room {
+      display: none;
+      width: 100%;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 12px;
+      margin-top: 8px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 850;
+      outline: none;
+    }
+
+    .custom-room.active {
+      display: block;
+    }
+
+    .primary,
+    .secondary {
+      width: 100%;
+      min-height: 54px;
+      border-radius: 8px;
+      border: 0;
+      font-size: 16px;
+      font-weight: 950;
+      flex: 0 0 auto;
+    }
+
+    .primary {
+      background: var(--blue);
+      color: #ffffff;
+    }
+
+    .secondary {
+      background: #f2f4f6;
+      color: #4e5968;
+    }
+
+    .home-view.active {
+      display: grid;
+      grid-template-rows: 2fr 1fr;
+      gap: 8px;
+    }
+
+    .today-panel,
+    .monthly-panel {
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .today-panel {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .today-scroll {
+      overflow: auto;
+      padding: 10px 12px;
+      min-height: 0;
+      flex: 1;
+    }
+
+    .today-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .region-select {
+      height: 26px;
+      min-width: 76px;
+      border: 1px solid #cfe0ff;
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--blue-dark);
+      padding: 0 6px;
+      font-size: 11px;
+      font-weight: 850;
+      outline: none;
+    }
+
+    .weather-card {
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid #edf0f3;
+      margin-bottom: 8px;
+      box-shadow: 0 8px 18px rgba(25, 31, 40, 0.04);
+    }
+
+    .weather-title {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 750;
+      margin-bottom: 0;
+    }
+
+    .weather-main {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 26px;
+    }
+
+    .weather-emoji {
+      width: 28px;
+      flex: 0 0 28px;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .weather-temp {
+      color: var(--text);
+      font-size: 20px;
+      line-height: 1;
+      font-weight: 950;
+    }
+
+    .weather-divider {
+      color: #9aa4b2;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .weather-humidity {
+      color: var(--blue);
+      font-size: 13px;
+      line-height: 1.1;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .weather-source {
+      color: #9aa4b2;
+      font-size: 8px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      margin-bottom: 6px;
+    }
+
+    .state-copy {
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #333d4b;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .slider-card {
+      padding: 12px 8px 10px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 0;
+      margin-bottom: 8px;
+    }
+
+    .usage-title {
+      margin: 0 0 6px;
+      color: var(--text);
+      font-size: 18px;
+      line-height: 1.3;
+      font-weight: 950;
+      text-align: center;
+    }
+
+    .hours-display {
+      color: var(--text);
+      font-size: 29px;
+      line-height: 1;
+      font-weight: 950;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .range-labels {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      align-items: center;
+      margin-top: 6px;
+      padding: 0 2px;
+      color: #8b95a1;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .range-labels span:nth-child(2),
+    .range-labels span:nth-child(3) {
+      justify-self: center;
+    }
+
+    .range-labels span:last-child {
+      justify-self: end;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    #hours {
+      height: 10px;
+      border-radius: 999px;
+      appearance: none;
+      background: linear-gradient(to right, var(--blue) 0%, var(--blue) 50%, #e5e8eb 50%, #e5e8eb 100%);
+      cursor: pointer;
+    }
+
+    #hours::-webkit-slider-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      appearance: none;
+      background: var(--blue);
+      box-shadow: 0 2px 8px rgba(0, 100, 255, 0.26);
+    }
+
+    #hours::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border: 0;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 2px 8px rgba(0, 100, 255, 0.26);
+    }
+
+    .cost-box {
+      margin-top: 10px;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      text-align: center;
+    }
+
+    .cost-box span {
+      display: inline;
+      color: #6b7684;
+      font-size: 14px;
+      font-weight: 750;
+      margin-bottom: 0;
+    }
+
+    .cost-box strong {
+      display: inline;
+      color: var(--blue);
+      font-size: 14px;
+      line-height: 1.3;
+      font-weight: 900;
+    }
+
+    .mode-title {
+      margin: 18px 0 10px;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.3;
+      font-weight: 950;
+    }
+
+    .mode-row {
+      margin-bottom: 0;
+    }
+
+    .mode-chip {
+      min-height: 44px;
+      border: 1px solid transparent;
+      background: #f9fafb;
+      color: #4e5968;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .mode-chip.selected {
+      border-color: var(--blue);
+      background: var(--blue-soft);
+      color: var(--blue);
+      box-shadow: inset 0 0 0 1px var(--blue);
+    }
+
+    .confirm-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .confirm-row .primary,
+    .confirm-row .secondary {
+      min-height: 36px;
+      font-size: 13px;
+    }
+
+    .confirm-row .secondary {
+      color: #6b7684;
+    }
+
+    .monthly-panel {
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .monthly-head {
+      display: none;
+    }
+
+    .monthly-head strong {
+      display: block;
+      font-size: 16px;
+      font-weight: 950;
+    }
+
+    .monthly-head span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      margin-top: 2px;
+    }
+
+    .progress {
+      display: none;
+      height: 8px;
+      border-radius: 999px;
+      background: #e9edf2;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--safe);
+      transition: width 0.2s ease, background 0.2s ease;
+    }
+
+    .monthly-grid {
+      display: block;
+    }
+
+    .cumulative-card {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .monthly-metric {
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      border: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .monthly-metric span {
+      display: block;
+      color: #4e5968;
+      font-size: 14px;
+      line-height: 1.35;
+      font-weight: 650;
+      margin-bottom: 0;
+      white-space: nowrap;
+    }
+
+    .monthly-metric strong {
+      display: block;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 950;
+    }
+
+    .cumulative-title {
+      color: #4e5968;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 850;
+    }
+
+    .cumulative-amount {
+      color: var(--text);
+      font-size: 28px;
+      line-height: 1.05;
+      font-weight: 950;
+      letter-spacing: 0;
+    }
+
+    .cumulative-caption {
+      color: #6b7684;
+      font-size: 10px;
+      line-height: 1.35;
+      font-weight: 750;
+    }
+
+    .cumulative-bar {
+      position: relative;
+      height: 12px;
+      margin: 10px 0 4px;
+      border-radius: 999px;
+      background: #e5e8eb;
+    }
+
+    .cumulative-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--blue);
+      transition: width 0.2s ease;
+    }
+
+    .cumulative-dot {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #cfd6e2;
+      transform: translateY(-50%);
+    }
+
+    .cumulative-foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: #6b7684;
+      font-size: 10px;
+      line-height: 1.35;
+      font-weight: 800;
+    }
+
+    .settings-line {
+      display: none;
+      justify-content: space-between;
+      gap: 8px;
+      color: #4e5968;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 750;
+      border-top: 1px solid #f0f2f4;
+      padding-top: 8px;
+    }
+
+    .toast {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      padding: 13px 14px;
+      border-radius: 8px;
+      background: rgba(25, 31, 40, 0.94);
+      color: #ffffff;
+      font-size: 13px;
+      line-height: 1.4;
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
+      transition: 0.2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.92);
+      display: none;
+      align-items: center;
+      padding: 18px;
+      z-index: 5;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      padding: 22px 18px 24px;
+      border-radius: 18px;
+      background: #f2f4f6;
+      box-shadow: none;
+    }
+
+    .modal h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.28;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .modal p {
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .avg-value {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+
+    .avg-value > span {
+      color: #8b95a1;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .avg-value strong {
+      color: var(--blue);
+      font-size: 18px;
+      font-weight: 950;
+      text-align: center;
+    }
+
+    .avg-value .max {
+      justify-self: end;
+      color: #8b95a1;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    #avgHours {
+      height: 10px;
+      border-radius: 999px;
+      appearance: none;
+      background: linear-gradient(to right, var(--blue) 0%, var(--blue) 33.333%, #d1d6de 33.333%, #d1d6de 100%);
+      cursor: pointer;
+    }
+
+    #avgHours::-webkit-slider-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      appearance: none;
+      background: var(--blue);
+    }
+
+    #avgHours::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border: 0;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+
+    .modal .primary {
+      min-height: 44px;
+      font-size: 15px;
+      margin-top: 18px;
+    }
+
+    #avgHoursText {
+      color: inherit;
+      font: inherit;
+    }
+
+    .notice {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #a0a8b3;
+      font-size: 9.5px;
+      line-height: 1.35;
+      font-weight: 650;
+    }
+
+    @media (max-width: 900px) {
+      .workspace {
+        grid-template-columns: 1fr;
+        padding: 26px 14px 42px;
+      }
+
+      .phone {
+        margin: 0 auto;
+      }
+
+      .brief-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .brief {
+        display: none;
+      }
+
+      .workspace {
+        padding: 0;
+      }
+
+      .phone {
+        width: 100%;
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+      }
+
+      .screen {
+        height: 100vh;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="workspace">
+    <section class="brief" aria-label="목업 설명">
+      <span class="badge">최신 요구사항 반영 목업</span>
+      <h1>냉방비 미리보기</h1>
+      <p>
+        최초 설정 후 홈 화면에서 오늘 냉방비와 이번 달 누적 사용 추정액을 확인하는 구조입니다.
+        상단은 오늘의 냉방을 확인하고, 하단은 하루씩 쌓이는 냉방비 흐름을 보여줍니다.
+      </p>
+      <div class="brief-grid">
+        <div class="brief-card">최초 설정: 방 크기, 에어컨 타입, 최근 사용 패턴</div>
+        <div class="brief-card">핵심 지표: 오늘 예상 냉방비와 이번 달 누적 추정액</div>
+        <div class="brief-card">상단 2/3: 오늘 날씨, 시간, 모드, 예상 냉방비</div>
+        <div class="brief-card">하단 1/3: 누적 사용 추정액과 월말 예상 흐름</div>
+      </div>
+    </section>
+
+    <section class="phone" aria-label="냉방비 미리보기 앱 목업">
+      <div class="screen">
+        <div class="status"></div>
+        <div class="app welcome-mode" id="app">
+          <div class="topbar">
+            <div class="brand">냉방비 미리보기</div>
+            <button class="mini-action" id="editSettings" type="button">설정 수정</button>
+          </div>
+
+          <section class="view welcome-view active" id="welcomeView">
+            <div class="welcome-hero">
+              <div class="welcome-icon" aria-hidden="true">❄</div>
+              <h2 class="welcome-title">오늘 에어컨 이만큼 써도<br>전기세 괜찮을까?</h2>
+              <p class="welcome-copy">이번 달 냉방비가<br>얼마나 쌓이는지 알려드려요</p>
+            </div>
+            <button class="primary" id="startSetup" type="button">시작하기</button>
+          </section>
+
+          <section class="view" id="setupView">
+            <div class="scroll">
+              <h2 class="question">기본 환경 설정</h2>
+
+              <div class="section">
+                <div class="section-title">방 크기</div>
+                <div class="chips" data-group="room">
+                  <button class="chip" data-room="5" type="button">5평 이하</button>
+                  <button class="chip selected" data-room="7" type="button">6~8평</button>
+                  <button class="chip" data-room="10.5" type="button">9~12평</button>
+                  <button class="chip" data-room="14" type="button">13평 이상</button>
+                  <button class="chip ghost wide" data-room="custom" type="button">직접 입력</button>
+                </div>
+                <input class="custom-room" id="customRoom" type="number" min="1" max="60" step="0.5" placeholder="예: 8.5">
+              </div>
+
+              <div class="section">
+                <div class="section-title">에어컨 타입</div>
+                <div class="chips" data-group="ac">
+                  <button class="chip selected" data-ac="wall" type="button">벽걸이형</button>
+                  <button class="chip" data-ac="stand" type="button">스탠드형</button>
+                  <button class="chip" data-ac="window" type="button">창문형</button>
+                  <button class="chip" data-ac="portable" type="button">이동식</button>
+                  <button class="chip ghost" data-ac="unknown" type="button">잘 모르겠어요</button>
+                </div>
+              </div>
+
+              <div class="section setup-average">
+                <div class="section-title">최근 일주일간 하루 평균 몇 시간 트셨나요?</div>
+                <p class="subcopy">이번 달 누적 사용액을 추정하기 위해 필요해요.</p>
+                <div class="avg-value">
+                  <span>0시간</span>
+                  <strong><span id="avgHoursText">4.0</span>시간</strong>
+                  <span class="max">12시간+</span>
+                </div>
+                <input id="avgHours" type="range" min="0" max="12" step="0.5" value="4">
+              </div>
+            </div>
+            <button class="primary" id="completeSetup" type="button">설정 완료</button>
+          </section>
+
+          <section class="view home-view" id="homeView">
+            <div class="today-panel">
+              <div class="today-scroll">
+                <div class="weather-card">
+                  <div class="today-head">
+                    <div class="weather-title">오늘의 날씨</div>
+                    <select class="region-select" id="region">
+                      <option value="seoul">서울</option>
+                      <option value="gyeonggi">경기</option>
+                      <option value="incheon">인천</option>
+                      <option value="busan">부산</option>
+                      <option value="daegu">대구</option>
+                      <option value="daejeon">대전</option>
+                      <option value="gwangju">광주</option>
+                      <option value="ulsan">울산</option>
+                      <option value="sejong">세종</option>
+                      <option value="gangwon">강원</option>
+                      <option value="chungbuk">충북</option>
+                      <option value="chungnam">충남</option>
+                      <option value="jeonbuk">전북</option>
+                      <option value="jeonnam">전남</option>
+                      <option value="gyeongbuk">경북</option>
+                      <option value="gyeongnam">경남</option>
+                      <option value="jeju">제주</option>
+                    </select>
+                  </div>
+                  <div class="weather-main">
+                    <div class="weather-emoji" id="weatherEmoji" aria-hidden="true">🌤️</div>
+                    <strong class="weather-temp" id="temperature">--℃</strong>
+                    <span class="weather-divider">|</span>
+                    <strong class="weather-humidity">습도 <span id="humidity">--%</span></strong>
+                  </div>
+                  <div class="weather-source" id="weatherSource">서울 기준 날씨를 불러오는 중</div>
+                </div>
+
+                <div class="slider-card">
+                  <h2 class="usage-title">오늘은 얼마나 켤까요?</h2>
+                  <div class="hours-display"><span id="hoursText">6</span>시간</div>
+                  <input id="hours" type="range" min="0" max="12" step="0.5" value="6">
+                  <div class="range-labels">
+                    <span>0</span>
+                    <span>4</span>
+                    <span>8</span>
+                    <span>12시간</span>
+                  </div>
+                  <div class="cost-box">
+                    <span>예상: </span>
+                    <strong id="todayCost">약 0원</strong>
+                  </div>
+                  <h3 class="mode-title">사용 모드</h3>
+                  <div class="mode-row">
+                    <div class="chips three" data-group="mode">
+                      <button class="chip mode-chip selected" data-mode="cool" type="button">냉방</button>
+                      <button class="chip mode-chip" data-mode="dry" type="button">제습</button>
+                      <button class="chip mode-chip" data-mode="sleep" type="button">취침</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="state-copy" id="stateCopy">냉방비가 하루 단위로 쌓이고 있어요.</div>
+
+                <div class="confirm-row">
+                  <button class="primary" id="confirmUse" type="button">오늘 사용 기록에 반영</button>
+                  <button class="secondary" id="undoUse" type="button">되돌리기</button>
+                </div>
+
+                <div class="notice">
+                  실제 전기요금은 누진제, 집 전체 사용량, 에어컨 소비전력, 설정 온도, 단열 상태에 따라 달라질 수 있어요.
+                  이 결과는 냉방비 관리를 위한 참고용 예상 금액이에요.
+                </div>
+              </div>
+            </div>
+
+            <div class="monthly-panel">
+              <div class="monthly-head">
+                <div>
+                  <strong>이번 달 냉방비 누적</strong>
+                  <span id="settingsSummary">6~8평 · 벽걸이형</span>
+                </div>
+                <button class="mini-action" id="quickEdit" type="button">수정</button>
+              </div>
+              <div class="monthly-grid">
+                <div class="cumulative-card">
+                  <div class="cumulative-title">이번 달 누적 사용 추정액</div>
+                  <div class="cumulative-amount" id="monthlyUsed">0원</div>
+                  <div class="cumulative-caption" id="monthlyCaption">오늘 포함 지난날 평균 0원씩 쌓이고 있어요</div>
+                  <div class="cumulative-bar" aria-label="이번 달 누적 사용 추정액 그래프">
+                    <div class="cumulative-fill" id="cumulativeFill"></div>
+                    <div class="cumulative-dot"></div>
+                  </div>
+                  <div class="cumulative-foot">
+                    <span id="monthDayLabel">1일째</span>
+                    <span id="monthProjection">이대로면 월말 약 0원</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="toast" id="toast">이번 달 누적 사용액에 반영했어요.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      room: 7,
+      ac: "wall",
+      region: "seoul",
+      hours: 6,
+      mode: "cool",
+      monthlyUsed: 0,
+      lastConfirmedCost: 0,
+      todayRecorded: false,
+      weather: { text: "맑음", temp: 31, humidity: 68 }
+    };
+
+    const regionMap = {
+      seoul: { name: "서울", lat: 37.5665, lon: 126.9780, fallback: { text: "맑음", temp: 31, humidity: 68 } },
+      gyeonggi: { name: "경기", lat: 37.2636, lon: 127.0286, fallback: { text: "구름 조금", temp: 31, humidity: 66 } },
+      incheon: { name: "인천", lat: 37.4563, lon: 126.7052, fallback: { text: "구름 조금", temp: 29, humidity: 72 } },
+      busan: { name: "부산", lat: 35.1796, lon: 129.0756, fallback: { text: "흐림", temp: 29, humidity: 73 } },
+      daegu: { name: "대구", lat: 35.8714, lon: 128.6014, fallback: { text: "폭염", temp: 34, humidity: 58 } },
+      daejeon: { name: "대전", lat: 36.3504, lon: 127.3845, fallback: { text: "맑음", temp: 32, humidity: 63 } },
+      gwangju: { name: "광주", lat: 35.1595, lon: 126.8526, fallback: { text: "구름 많음", temp: 30, humidity: 70 } },
+      ulsan: { name: "울산", lat: 35.5384, lon: 129.3114, fallback: { text: "흐림", temp: 30, humidity: 71 } },
+      sejong: { name: "세종", lat: 36.4800, lon: 127.2890, fallback: { text: "맑음", temp: 31, humidity: 64 } },
+      gangwon: { name: "강원", lat: 37.8813, lon: 127.7298, fallback: { text: "구름 조금", temp: 29, humidity: 67 } },
+      chungbuk: { name: "충북", lat: 36.6424, lon: 127.4890, fallback: { text: "맑음", temp: 32, humidity: 62 } },
+      chungnam: { name: "충남", lat: 36.8151, lon: 127.1139, fallback: { text: "구름 많음", temp: 31, humidity: 68 } },
+      jeonbuk: { name: "전북", lat: 35.8242, lon: 127.1480, fallback: { text: "구름 많음", temp: 31, humidity: 69 } },
+      jeonnam: { name: "전남", lat: 34.8118, lon: 126.3922, fallback: { text: "비", temp: 29, humidity: 78 } },
+      gyeongbuk: { name: "경북", lat: 36.0190, lon: 129.3435, fallback: { text: "맑음", temp: 33, humidity: 61 } },
+      gyeongnam: { name: "경남", lat: 35.2281, lon: 128.6811, fallback: { text: "흐림", temp: 30, humidity: 72 } },
+      jeju: { name: "제주", lat: 33.4996, lon: 126.5312, fallback: { text: "비", temp: 28, humidity: 82 } }
+    };
+
+    const acWatts = {
+      wall: 0.65,
+      stand: 1.8,
+      window: 0.75,
+      portable: 0.9,
+      unknown: 0.65
+    };
+
+    const acLabel = {
+      wall: "벽걸이형",
+      stand: "스탠드형",
+      window: "창문형",
+      portable: "이동식",
+      unknown: "잘 모르겠어요"
+    };
+
+    const roomLabel = {
+      5: "5평 이하",
+      7: "6~8평",
+      10.5: "9~12평",
+      14: "13평 이상"
+    };
+
+    const modeFactor = {
+      cool: 1,
+      dry: 0.72,
+      sleep: 0.58
+    };
+
+    const modeLabel = {
+      cool: "냉방",
+      dry: "제습",
+      sleep: "취침"
+    };
+
+    const weatherCodeText = {
+      0: "맑음",
+      1: "맑음",
+      2: "구름 조금",
+      3: "흐림",
+      45: "안개",
+      48: "안개",
+      51: "이슬비",
+      53: "이슬비",
+      55: "이슬비",
+      61: "비",
+      63: "비",
+      65: "강한 비",
+      71: "눈",
+      80: "소나기",
+      81: "소나기",
+      82: "강한 소나기",
+      95: "뇌우"
+    };
+
+    const won = value => `${Math.round(value).toLocaleString("ko-KR")}원`;
+    const approxWon = value => `약 ${won(value)}`;
+    const formatHours = value => Number(value).toFixed(1);
+    const formatPlainWon = value => `${Math.round(value).toLocaleString("ko-KR")}원`;
+    const formatRoom = value => roomLabel[value] || `${Number(value).toLocaleString("ko-KR", { maximumFractionDigits: 1 })}평`;
+
+    function calculateCost(hours = state.hours) {
+      const roomFactor = 0.86 + (Number(state.room) / 10) * 0.18;
+      const humidityFactor = state.weather.humidity >= 75 ? 1.08 : state.weather.humidity <= 55 ? 0.96 : 1;
+      const tempFactor = state.weather.temp >= 33 ? 1.12 : state.weather.temp >= 30 ? 1.04 : 0.98;
+      const kwh = acWatts[state.ac] * hours * modeFactor[state.mode] * roomFactor * humidityFactor * tempFactor;
+      return Math.max(0, kwh * 260);
+    }
+
+    function currentNumbers() {
+      const todayCost = calculateCost();
+      const reflected = state.monthlyUsed + (state.todayRecorded ? 0 : todayCost);
+      const today = new Date();
+      const dayOfMonth = today.getDate();
+      const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+      const dailyAverage = reflected / Math.max(1, dayOfMonth);
+      const monthProjection = dailyAverage * daysInMonth;
+      const monthProgress = dayOfMonth / daysInMonth * 100;
+      return { todayCost, reflected, dayOfMonth, dailyAverage, monthProjection, monthProgress };
+    }
+
+    function usageMessage(nums) {
+      if (nums.dailyAverage < 1500) return "아직은 낮은 사용 패턴이에요.";
+      if (nums.dailyAverage < 3000) return "냉방비가 하루 단위로 꾸준히 쌓이고 있어요.";
+      return "최근 패턴이면 월말 냉방비가 크게 쌓일 수 있어요.";
+    }
+
+    function selectView(id) {
+      document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === id));
+      document.getElementById("app").classList.toggle("welcome-mode", id === "welcomeView");
+      document.getElementById("editSettings").style.visibility = id === "homeView" ? "visible" : "hidden";
+    }
+
+    function render() {
+      const nums = currentNumbers();
+      const hourPercent = Math.max(0, Math.min(100, state.hours / 12 * 100));
+
+      document.getElementById("todayCost").textContent = approxWon(nums.todayCost);
+      document.getElementById("hoursText").textContent = formatHours(state.hours);
+      document.getElementById("hours").style.background = `linear-gradient(to right, var(--blue) 0%, var(--blue) ${hourPercent}%, #e5e8eb ${hourPercent}%, #e5e8eb 100%)`;
+      document.getElementById("stateCopy").textContent = usageMessage(nums);
+
+      document.getElementById("monthlyUsed").textContent = formatPlainWon(nums.reflected);
+      document.getElementById("monthlyCaption").textContent = `오늘 포함 지난날 평균 ${formatPlainWon(nums.dailyAverage)}씩 쌓이고 있어요`;
+      document.getElementById("cumulativeFill").style.width = `${Math.min(100, nums.monthProgress)}%`;
+      document.getElementById("monthDayLabel").textContent = `${nums.dayOfMonth}일째`;
+      document.getElementById("monthProjection").textContent = `이대로면 월말 약 ${formatPlainWon(nums.monthProjection)}`;
+      document.getElementById("settingsSummary").textContent = `${formatRoom(state.room)} · ${acLabel[state.ac]}`;
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function updateAvgSlider() {
+      const avg = Number(document.getElementById("avgHours").value);
+      const percent = Math.max(0, Math.min(100, avg / 12 * 100));
+      document.getElementById("avgHoursText").textContent = formatHours(avg);
+      document.getElementById("avgHours").style.background = `linear-gradient(to right, var(--blue) 0%, var(--blue) ${percent}%, #d1d6de ${percent}%, #d1d6de 100%)`;
+    }
+
+    function selectChip(button) {
+      const parent = button.closest(".chips");
+      parent.querySelectorAll(".chip").forEach(chip => chip.classList.remove("selected"));
+      button.classList.add("selected");
+
+      if (button.dataset.room) {
+        const input = document.getElementById("customRoom");
+        if (button.dataset.room === "custom") {
+          input.classList.add("active");
+          input.focus();
+          const value = Number(input.value);
+          if (value > 0) state.room = value;
+        } else {
+          input.classList.remove("active");
+          state.room = Number(button.dataset.room);
+        }
+      }
+      if (button.dataset.ac) state.ac = button.dataset.ac;
+      if (button.dataset.mode) state.mode = button.dataset.mode;
+      render();
+    }
+
+    function weatherEmoji(text, temp) {
+      if (text.includes("뇌우")) return "⛈️";
+      if (text.includes("비") || text.includes("소나기")) return "🌧️";
+      if (text.includes("눈")) return "❄️";
+      if (text.includes("안개")) return "🌫️";
+      if (text.includes("흐림")) return "☁️";
+      if (text.includes("구름")) return "⛅";
+      if (temp >= 33) return "☀️";
+      return "🌤️";
+    }
+
+    async function loadWeather(regionKey) {
+      const region = regionMap[regionKey];
+      document.getElementById("weatherSource").textContent = `${region.name} 기준 날씨를 불러오는 중`;
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${region.lat}&longitude=${region.lon}&current=temperature_2m,relative_humidity_2m,weather_code&timezone=Asia%2FSeoul`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("weather failed");
+        const data = await response.json();
+        const current = data.current;
+        state.weather = {
+          text: weatherCodeText[current.weather_code] || "날씨 확인",
+          temp: Math.round(current.temperature_2m),
+          humidity: Math.round(current.relative_humidity_2m)
+        };
+        document.getElementById("weatherSource").textContent = `${region.name} 기준 · Open-Meteo API`;
+      } catch (error) {
+        state.weather = { ...region.fallback };
+        document.getElementById("weatherSource").textContent = `${region.name} 기준 · API 실패 시 목업값`;
+      }
+      document.getElementById("weatherEmoji").textContent = weatherEmoji(state.weather.text, state.weather.temp);
+      document.getElementById("temperature").textContent = `${state.weather.temp}℃`;
+      document.getElementById("humidity").textContent = `${state.weather.humidity}%`;
+      render();
+    }
+
+    document.querySelectorAll(".chip").forEach(button => {
+      button.addEventListener("click", () => selectChip(button));
+    });
+
+    document.getElementById("hours").addEventListener("input", event => {
+      state.hours = Number(event.target.value);
+      render();
+    });
+
+    document.getElementById("avgHours").addEventListener("input", event => {
+      updateAvgSlider();
+    });
+
+    document.getElementById("customRoom").addEventListener("input", event => {
+      const value = Number(event.target.value);
+      if (value > 0) state.room = value;
+      render();
+    });
+
+    document.getElementById("startSetup").addEventListener("click", () => {
+      selectView("setupView");
+    });
+
+    document.getElementById("completeSetup").addEventListener("click", () => {
+      const avg = Number(document.getElementById("avgHours").value);
+      const today = new Date();
+      const daysElapsed = Math.max(0, today.getDate() - 1);
+      state.monthlyUsed = calculateCost(avg) * daysElapsed;
+      state.todayRecorded = false;
+      state.lastConfirmedCost = 0;
+      selectView("homeView");
+      loadWeather(state.region);
+      updateAvgSlider();
+      render();
+    });
+
+    document.getElementById("confirmUse").addEventListener("click", () => {
+      if (state.todayRecorded) {
+        showToast("오늘 사용 기록은 이미 반영했어요.");
+        return;
+      }
+      const cost = calculateCost();
+      state.monthlyUsed += cost;
+      state.lastConfirmedCost = cost;
+      state.todayRecorded = true;
+      render();
+      showToast("오늘 예상 냉방비를 이번 달 누적 사용액에 반영했어요.");
+    });
+
+    document.getElementById("undoUse").addEventListener("click", () => {
+      if (state.lastConfirmedCost <= 0) {
+        showToast("되돌릴 사용 기록이 없어요.");
+        return;
+      }
+      state.monthlyUsed = Math.max(0, state.monthlyUsed - state.lastConfirmedCost);
+      state.lastConfirmedCost = 0;
+      state.todayRecorded = false;
+      render();
+      showToast("방금 반영한 사용 기록을 되돌렸어요.");
+    });
+
+    document.getElementById("editSettings").addEventListener("click", () => selectView("setupView"));
+    document.getElementById("quickEdit").addEventListener("click", () => selectView("setupView"));
+
+    document.getElementById("region").addEventListener("change", event => {
+      state.region = event.target.value;
+      loadWeather(state.region);
+    });
+
+    document.getElementById("editSettings").style.visibility = "hidden";
+    render();
+  </script>
+</body>
+</html>
