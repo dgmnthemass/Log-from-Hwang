@@ -2,7 +2,7 @@
 
 **교환학생 준비를 위한 정보를 나만의 준비 목록으로 연결하는 웹서비스.**
 
-[서비스 체험하기](https://compass-puce-gamma.vercel.app) · [프로젝트 목록으로 돌아가기](README.md)
+[서비스 체험하기](https://compass-puce-gamma.vercel.app) · [프로젝트 목록으로 돌아가기](../../README.md)
 
 | 항목 | 내용 |
 |---|---|
@@ -97,4 +97,4 @@ Graz·BYU의 상세 안내와 다른 학교의 공통 준비 안내를 구분합
 
 ---
 
-[서비스 체험하기](https://compass-puce-gamma.vercel.app) · [Log from Hwang](README.md)
+[서비스 체험하기](https://compass-puce-gamma.vercel.app) · [Log from Hwang](../../README.md)

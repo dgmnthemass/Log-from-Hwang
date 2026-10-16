@@ -6,6 +6,7 @@
 - 보존: React·CSS 소스, public 리소스, 패키지·잠금·TypeScript·ESLint·Granite 설정, HTML 목업, 당시 요구사항.
 - 제외: node_modules, 생성된 dist/.granite/.ait, 실행 로그, QR, 개인용 실행 스크립트·에디터 설정, 대용량 외부 SDK 문서 사본. 콘솔 제출용 자산은 원본 폴더에 보존했다.
 - 원본 파일별 SHA-256은 `origin-manifest.json`에 기록한다. 공백·개행 정리나 설정 수정이 있는 개선 소스와 구분한다.
+- 원본 요구사항·HTML 목업·보관 정보는 이 `docs/archive/` 폴더에 모았다. 해시 목록의 `path`는 보관 당시 원본 구조를 나타내며, 현재 저장소 경로와 구분한다.
 
 ## 기존 배포 패키지
 
