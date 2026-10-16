@@ -4,7 +4,7 @@
 
 사용시간과 모드를 바꾸며 냉방비를 비교하고, 직접 입력한 기록과 자동 추정한 지난 날짜를 구분해 월별로 모읍니다. v0.2.0은 같은 기기의 같은 브라우저에서 이어서 사용할 수 있는 체험 MVP입니다.
 
-[소스·실행 안내](miniapps/cooling-cost-preview/) · [요구사항·설계](miniapps/cooling-cost-preview/docs/design-v0.2.md) · [검증 기록](miniapps/cooling-cost-preview/docs/verification.md)
+[서비스 체험](https://dgmnthemass.github.io/Log-from-Hwang/cooling-cost-preview/) · [소스·실행 안내](miniapps/cooling-cost-preview/) · [요구사항·설계](miniapps/cooling-cost-preview/docs/design-v0.2.md) · [검증 기록](miniapps/cooling-cost-preview/docs/verification.md)
 
 ## 해결하려는 문제
 
@@ -61,7 +61,7 @@
 
 ## 남은 범위
 
-계정·기기 간 동기화와 외부 웹 배포는 제공하지 않습니다. 브라우저 데이터를 삭제하면 기록도 사라질 수 있습니다. 토스 실기기 실행·새 `.ait` 패키지 생성·출시 심사는 후속 단계입니다. 기존 SDK 전이 의존성의 peer 경고도 토스 실행 검증 때 별도로 다뤄야 합니다.
+GitHub Pages에서 공개 웹 체험을 제공합니다. 계정·기기 간 동기화는 제공하지 않습니다. 브라우저 데이터를 삭제하면 기록도 사라질 수 있습니다. 토스 실기기 실행·새 `.ait` 패키지 생성·출시 심사는 후속 단계입니다. 기존 SDK 전이 의존성의 peer 경고도 토스 실행 검증 때 별도로 다뤄야 합니다.
 
 ## 원본 보관
 

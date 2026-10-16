@@ -2,6 +2,10 @@
 
 사용시간에 따른 참고용 냉방비를 비교하고, 직접 기록과 자동 추정을 구분해 월별로 보관하는 브라우저 MVP입니다. 같은 브라우저에서 다시 열어도 설정·입력·기록을 복원합니다.
 
+**[웹에서 바로 체험하기](https://dgmnthemass.github.io/Log-from-Hwang/cooling-cost-preview/)**
+
+GitHub Pages의 `gh-pages` 브랜치에서 정적 웹 빌드를 제공합니다. 앱은 `cooling-cost-preview/` 경로에 배치하며, Vite의 상대 경로 설정으로 HTML과 자산을 불러옵니다. 배포 시 `pnpm build:web`로 만든 `dist/web/` 내용을 해당 경로에 반영합니다. 배포본의 `deployment.json`에서 소스 커밋을 확인할 수 있습니다.
+
 ## 실행
 
 Node **24.19.0**(24 계열), pnpm **11.7.0**을 사용합니다.
