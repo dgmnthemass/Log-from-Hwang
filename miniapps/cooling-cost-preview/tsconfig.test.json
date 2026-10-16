@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "tsBuildInfoFile": "./node_modules/.tmp/tests.tsbuildinfo"
+  },
+  "include": [
+    "tests/**/*.ts",
+    "src/model.ts",
+    "src/dates.ts",
+    "src/ledger.ts",
+    "src/storage.ts",
+    "src/weather.ts",
+    "src/regions.ts"
+  ]
+}
