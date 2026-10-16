@@ -7,7 +7,7 @@ Hwang의 프로젝트 포트폴리오입니다. 각 기록에는 해결하려는
 ## Projects
 
 |  프로젝트  | 한 줄 소개 | 살펴보기 |
-|---|---|---|
+| --- |---|---|
 | **___에서 살아남기** | 흩어진 교환학생 준비 정보를 학교·체류 조건에 맞는 할 일로 연결하는 웹서비스 | [프로젝트 기록](projects/compass/) · [서비스 체험](https://compass-puce-gamma.vercel.app) |
 | **냉방비 미리보기** | 오늘 사용량과 자동 추정을 구분해 월별 냉방비를 살펴보는 브라우저 MVP | [프로젝트 기록](projects/cooling-cost-preview/) · [서비스 체험](https://dgmnthemass.github.io/Log-from-Hwang/cooling-cost-preview/) · [소스·실행 안내](projects/cooling-cost-preview/app/) |
 
