@@ -12,7 +12,7 @@ Node **24.19.0**(24 계열), pnpm **11.7.0**을 사용합니다.
 
 ```sh
 npm install --global pnpm@11.7.0
-cd miniapps/cooling-cost-preview
+cd projects/cooling-cost-preview/app
 pnpm install --frozen-lockfile
 pnpm dev:web
 ```
@@ -47,11 +47,11 @@ pnpm test:browser      # 로컬 프로덕션 서버를 열어 브라우저 흐�
 
 ## 문서
 
-- [프로젝트 기록](../../Cooling-Cost-Preview.md)
-- [v0.2 요구사항·계산·저장 설계](docs/design-v0.2.md)
-- [검증 결과](docs/verification.md)
-- [원본 보관 정보](docs/origin.md)
-- [원본 요구사항](docs/requirements-v0.1.md)
-- [원본 HTML 목업](aircon-safe-budget-monthly-mockup.html)
+- [프로젝트 기록](../README.md)
+- [v0.2 요구사항·계산·저장 설계](../docs/design-v0.2.md)
+- [검증 결과](../docs/verification.md)
+- [원본 보관 정보](../docs/archive/origin.md)
+- [원본 요구사항](../docs/archive/requirements-v0.1.md)
+- [원본 HTML 목업](../docs/archive/aircon-safe-budget-monthly-mockup.html)
 
 날씨: [Open-Meteo](https://open-meteo.com/) / [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). 전기요금 산식의 상수는 원본 프로토타입의 가정이며 공인 요율이나 실측 성능을 뜻하지 않습니다.

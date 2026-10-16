@@ -4,7 +4,9 @@
 
 사용시간과 모드를 바꾸며 냉방비를 비교하고, 직접 입력한 기록과 자동 추정한 지난 날짜를 구분해 월별로 모읍니다. v0.2.0은 같은 기기의 같은 브라우저에서 이어서 사용할 수 있는 체험 MVP입니다.
 
-[서비스 체험](https://dgmnthemass.github.io/Log-from-Hwang/cooling-cost-preview/) · [소스·실행 안내](miniapps/cooling-cost-preview/) · [요구사항·설계](miniapps/cooling-cost-preview/docs/design-v0.2.md) · [검증 기록](miniapps/cooling-cost-preview/docs/verification.md)
+[서비스 체험](https://dgmnthemass.github.io/Log-from-Hwang/cooling-cost-preview/) · [소스·실행 안내](app/) · [요구사항·설계](docs/design-v0.2.md) · [검증 기록](docs/verification.md)
+
+[전체 프로젝트 목록](../../README.md)
 
 ## 해결하려는 문제
 
@@ -20,7 +22,7 @@
 4. 월별 목록에서 직접 입력과 자동 추정의 차이를 확인합니다.
 5. 같은 브라우저로 다시 접속해 이전 설정과 기록을 이어갑니다.
 
-<img src="assets/cooling-cost-preview/home-390.png" alt="오늘 미리보기: 월 누적액과 직접 입력·자동 추정 내역, 오늘 사용량 수정" width="340" />
+<img src="assets/home-390.png" alt="오늘 미리보기: 월 누적액과 직접 입력·자동 추정 내역, 오늘 사용량 수정" width="340" />
 
 예시 화면. 월 누적에는 저장 당시 금액을 유지하고, 입력 변경 후의 비교 금액을 별도로 보여줍니다.
 
@@ -45,7 +47,7 @@
 
 **저장 실패를 성공처럼 안내하지 않도록 했습니다.** 손상된 데이터, 접근 거부, 저장 공간 부족, 다른 탭 변경을 감지하면 변경을 중지하고 복구 화면을 보여줍니다. 원문 내보내기와 별도 백업 후 초기화를 제공하며, 백업에 실패하면 원본을 삭제하지 않습니다.
 
-<img src="assets/cooling-cost-preview/history-390.png" alt="날짜별 직접 입력과 자동 추정을 구분한 월별 기록 목록" width="340" />
+<img src="assets/history-390.png" alt="날짜별 직접 입력과 자동 추정을 구분한 월별 기록 목록" width="340" />
 
 ## 확인한 결과
 
@@ -57,7 +59,7 @@
 - 320px·390px·데스크톱 화면의 가로 넘침과 주요 조작, 키보드 슬라이더 확인.
 - 실제 Open-Meteo 서울 날씨 응답의 조회·형식 검사 성공.
 
-일반 웹 빌드 JavaScript는 원본 약 1,227KB에서 약 170KB로 줄었습니다. 웹 실행에서 불필요한 토스 전용 Provider를 포함하지 않도록 분리한 결과입니다. 설치 재현·타입 검사·lint·프로덕션 빌드와 세부 근거는 [검증 기록](miniapps/cooling-cost-preview/docs/verification.md)에 남깁니다.
+일반 웹 빌드 JavaScript는 원본 약 1,227KB에서 약 170KB로 줄었습니다. 웹 실행에서 불필요한 토스 전용 Provider를 포함하지 않도록 분리한 결과입니다. 설치 재현·타입 검사·lint·프로덕션 빌드와 세부 근거는 [검증 기록](docs/verification.md)에 남깁니다.
 
 ## 남은 범위
 
@@ -65,4 +67,4 @@ GitHub Pages에서 공개 웹 체험을 제공합니다. 계정·기기 간 동�
 
 ## 원본 보관
 
-사용자 PC에서 발견한 v0.1 소스를 먼저 보관하고, 개선 내용을 별도 커밋으로 기록했습니다. 원본 PC 폴더는 그대로 유지했습니다. HTML 목업·요구사항·원본 파일 해시와 기존 `.ait`의 확인 상태는 [원본 보관 정보](miniapps/cooling-cost-preview/docs/origin.md)에서 확인할 수 있습니다.
+사용자 PC에서 발견한 v0.1 소스를 먼저 보관하고, 개선 내용을 별도 커밋으로 기록했습니다. 원본 PC 폴더는 그대로 유지했습니다. HTML 목업·요구사항·원본 파일 해시와 기존 `.ait`의 확인 상태는 [원본 보관 정보](docs/archive/origin.md)에서 확인할 수 있습니다.

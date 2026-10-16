@@ -46,7 +46,7 @@
 5. 손상 데이터 보존·별도 백업 후 초기화, 저장소 접근 거부·공간 부족 시 복구 화면과 마지막 저장본 유지.
 6. 두 탭에서 변경 충돌 안내 후 최신 데이터 재조회.
 
-화면 폭 **320px, 390px, 1280px**에서 오늘 화면의 가로 넘침을 검사했다. 설정과 기록 목록의 이름 있는 입력·버튼·슬라이더를 실제로 조작했다. 화면 이미지는 [오늘](../../../assets/cooling-cost-preview/home-390.png), [기록](../../../assets/cooling-cost-preview/history-390.png), [복구](../../../assets/cooling-cost-preview/recovery-390.png)에 보관한다. 기계 판독 결과는 [browser-results.json](browser-results.json)이다.
+화면 폭 **320px, 390px, 1280px**에서 오늘 화면의 가로 넘침을 검사했다. 설정과 기록 목록의 이름 있는 입력·버튼·슬라이더를 실제로 조작했다. 화면 이미지는 [오늘](../assets/home-390.png), [기록](../assets/history-390.png), [복구](../assets/recovery-390.png)에 보관한다. 기계 판독 결과는 [browser-results.json](browser-results.json)이다.
 
 실제 외부 API도 별도로 조회했다. 2026-10-16 16:47 한국 시간에 개선된 `fetchWeather` 함수로 서울 응답(21.6°C, 습도 65%, 맑음, 관측 기준 16:45)을 읽고 유효성 검사를 통과했다. 재현용 화면의 고정 응답과 실제 조회값은 구분한다.
 
