@@ -1,0 +1,43 @@
+name: Cooling cost preview
+
+on:
+  pull_request:
+    paths:
+      - 'miniapps/cooling-cost-preview/**'
+      - '.github/workflows/cooling-cost-preview.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'miniapps/cooling-cost-preview/**'
+      - '.github/workflows/cooling-cost-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  web-mvp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: miniapps/cooling-cost-preview
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.19.0'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+          package_json_file: miniapps/cooling-cost-preview/package.json
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:browser
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cooling-cost-preview-browser-results
+          path: miniapps/cooling-cost-preview/test-results/
+          if-no-files-found: ignore

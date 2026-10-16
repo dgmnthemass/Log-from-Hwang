@@ -1,0 +1,11 @@
+{
+  "passed": [
+    "Setup validation, keyboard sliders, draft reload, save/replace/cancel including zero, setting snapshot preservation, monthly history, 320/390/1280px layouts",
+    "Reopened browser context restores records; live Korean midnight and month rollover retain October history",
+    "Network failure, malformed response and timeout show labelled examples; same-region cached response is labelled separately",
+    "Late response from previous region cannot replace the selected region weather",
+    "Corrupt-data recovery backs up before reset; read denial and quota failure preserve original storage and show blocking recovery",
+    "Concurrent tabs block stale writes and recover by reloading the latest data"
+  ],
+  "pageErrors": []
+}

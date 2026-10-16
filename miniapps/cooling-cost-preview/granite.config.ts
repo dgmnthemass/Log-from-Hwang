@@ -8,11 +8,11 @@ export default defineConfig({
     icon: "appsintoss-logo.png",
   },
   web: {
-    host: "192.168.35.191",
+    host: process.env.TOSS_DEV_HOST || "localhost",
     port: 5173,
     commands: {
-      dev: "vite dev --host 0.0.0.0",
-      build: "vite build",
+      dev: "vite dev --mode toss --host 0.0.0.0",
+      build: "vite build --mode toss",
     },
   },
   permissions: [],

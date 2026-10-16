@@ -1,478 +1,627 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
+import { koreaDate, monthOf } from "./dates.ts";
+import {
+  cancelToday,
+  changeDraft,
+  changeSettings,
+  createData,
+  monthlySummary,
+  saveToday,
+} from "./ledger.ts";
+import {
+  acLabels,
+  calculateCost,
+  defaultSettings,
+  modeLabels,
+  validSettings,
+  won,
+} from "./model.ts";
+import type { AcType, Mode, Settings } from "./model.ts";
+import { regions } from "./regions.ts";
+import type { RegionKey } from "./regions.ts";
+import { useLedger, useWeather } from "./hooks.ts";
 import "./App.css";
 
-type View = "welcome" | "setup" | "home";
-type AcType = "wall" | "stand" | "window" | "portable" | "unknown";
-type Mode = "cool" | "dry" | "sleep";
-type RegionKey =
-  | "seoul"
-  | "gyeonggi"
-  | "incheon"
-  | "busan"
-  | "daegu"
-  | "daejeon"
-  | "gwangju"
-  | "ulsan"
-  | "sejong"
-  | "gangwon"
-  | "chungbuk"
-  | "chungnam"
-  | "jeonbuk"
-  | "jeonnam"
-  | "gyeongbuk"
-  | "gyeongnam"
-  | "jeju";
-
-interface Weather {
-  text: string;
-  temp: number;
-  humidity: number;
-}
-
-interface Region {
-  name: string;
-  lat: number;
-  lon: number;
-  fallback: Weather;
-}
-
-const BLUE = "#0064FF";
-
-const regionMap: Record<RegionKey, Region> = {
-  seoul: { name: "서울", lat: 37.5665, lon: 126.978, fallback: { text: "맑음", temp: 31, humidity: 68 } },
-  gyeonggi: { name: "경기", lat: 37.2636, lon: 127.0286, fallback: { text: "구름 조금", temp: 31, humidity: 66 } },
-  incheon: { name: "인천", lat: 37.4563, lon: 126.7052, fallback: { text: "구름 조금", temp: 29, humidity: 72 } },
-  busan: { name: "부산", lat: 35.1796, lon: 129.0756, fallback: { text: "흐림", temp: 29, humidity: 73 } },
-  daegu: { name: "대구", lat: 35.8714, lon: 128.6014, fallback: { text: "폭염", temp: 34, humidity: 58 } },
-  daejeon: { name: "대전", lat: 36.3504, lon: 127.3845, fallback: { text: "맑음", temp: 32, humidity: 63 } },
-  gwangju: { name: "광주", lat: 35.1595, lon: 126.8526, fallback: { text: "구름 많음", temp: 30, humidity: 70 } },
-  ulsan: { name: "울산", lat: 35.5384, lon: 129.3114, fallback: { text: "흐림", temp: 30, humidity: 71 } },
-  sejong: { name: "세종", lat: 36.48, lon: 127.289, fallback: { text: "맑음", temp: 31, humidity: 64 } },
-  gangwon: { name: "강원", lat: 37.8813, lon: 127.7298, fallback: { text: "구름 조금", temp: 29, humidity: 67 } },
-  chungbuk: { name: "충북", lat: 36.6424, lon: 127.489, fallback: { text: "맑음", temp: 32, humidity: 62 } },
-  chungnam: { name: "충남", lat: 36.8151, lon: 127.1139, fallback: { text: "구름 많음", temp: 31, humidity: 68 } },
-  jeonbuk: { name: "전북", lat: 35.8242, lon: 127.148, fallback: { text: "구름 많음", temp: 31, humidity: 69 } },
-  jeonnam: { name: "전남", lat: 34.8118, lon: 126.3922, fallback: { text: "비", temp: 29, humidity: 78 } },
-  gyeongbuk: { name: "경북", lat: 36.019, lon: 129.3435, fallback: { text: "맑음", temp: 33, humidity: 61 } },
-  gyeongnam: { name: "경남", lat: 35.2281, lon: 128.6811, fallback: { text: "흐림", temp: 30, humidity: 72 } },
-  jeju: { name: "제주", lat: 33.4996, lon: 126.5312, fallback: { text: "비", temp: 28, humidity: 82 } },
-};
-
-const weatherCodeText: Record<number, string> = {
-  0: "맑음",
-  1: "맑음",
-  2: "구름 조금",
-  3: "흐림",
-  45: "안개",
-  48: "안개",
-  51: "이슬비",
-  53: "이슬비",
-  55: "이슬비",
-  61: "비",
-  63: "비",
-  65: "강한 비",
-  71: "눈",
-  80: "소나기",
-  81: "소나기",
-  82: "강한 소나기",
-  95: "뇌우",
-};
-
-const acWatts: Record<AcType, number> = {
-  wall: 0.65,
-  stand: 1.8,
-  window: 0.75,
-  portable: 0.9,
-  unknown: 0.65,
-};
-
-const acLabel: Record<AcType, string> = {
-  wall: "벽걸이형",
-  stand: "스탠드형",
-  window: "창문형",
-  portable: "이동식",
-  unknown: "잘 모르겠어요",
-};
-
-const modeFactor: Record<Mode, number> = {
-  cool: 1,
-  dry: 0.72,
-  sleep: 0.58,
-};
-
-function formatWon(value: number) {
-  return `${Math.round(value).toLocaleString("ko-KR")}원`;
-}
-
-function formatApproxWon(value: number) {
-  return `약 ${formatWon(value)}`;
-}
-
-function formatHours(value: number) {
-  return value.toFixed(1);
-}
-
-function weatherEmoji(text: string, temp: number) {
-  if (text.includes("뇌우")) return "⛈️";
-  if (text.includes("비") || text.includes("소나기")) return "🌧️";
-  if (text.includes("눈")) return "❄️";
-  if (text.includes("안개")) return "🌫️";
-  if (text.includes("흐림")) return "☁️";
-  if (text.includes("구름")) return "⛅";
-  if (temp >= 33) return "☀️";
-  return "🌤️";
-}
-
-function App() {
-  const [view, setView] = useState<View>("welcome");
-  const [room, setRoom] = useState(7);
-  const [customRoomOpen, setCustomRoomOpen] = useState(false);
-  const [ac, setAc] = useState<AcType>("wall");
-  const [regionKey, setRegionKey] = useState<RegionKey>("seoul");
-  const [hours, setHours] = useState(6);
-  const [averageHours, setAverageHours] = useState(4);
-  const [mode, setMode] = useState<Mode>("cool");
-  const [monthlyUsed, setMonthlyUsed] = useState(0);
-  const [lastConfirmedCost, setLastConfirmedCost] = useState(0);
-  const [todayRecorded, setTodayRecorded] = useState(false);
-  const [weather, setWeather] = useState<Weather>(regionMap.seoul.fallback);
-  const [weatherSource, setWeatherSource] = useState("서울 기준 날씨를 불러오는 중");
-  const [toast, setToast] = useState("");
-
-  const calculateCost = (targetHours = hours) => {
-    const roomFactor = 0.86 + (room / 10) * 0.18;
-    const humidityFactor = weather.humidity >= 75 ? 1.08 : weather.humidity <= 55 ? 0.96 : 1;
-    const tempFactor = weather.temp >= 33 ? 1.12 : weather.temp >= 30 ? 1.04 : 0.98;
-    const kwh = acWatts[ac] * targetHours * modeFactor[mode] * roomFactor * humidityFactor * tempFactor;
-
-    return Math.max(0, kwh * 260);
-  };
-
-  const numbers = useMemo(() => {
-    const todayCost = calculateCost();
-    const reflected = monthlyUsed + (todayRecorded ? 0 : todayCost);
-    const today = new Date();
-    const dayOfMonth = today.getDate();
-    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-    const dailyAverage = reflected / Math.max(1, dayOfMonth);
-    const monthProjection = dailyAverage * daysInMonth;
-    const monthProgress = (dayOfMonth / daysInMonth) * 100;
-
-    return { todayCost, reflected, dayOfMonth, dailyAverage, monthProjection, monthProgress };
-  }, [monthlyUsed, todayRecorded, hours, room, ac, mode, weather]);
-
-  useEffect(() => {
-    const region = regionMap[regionKey];
-    let ignored = false;
-
-    async function loadWeather() {
-      setWeatherSource(`${region.name} 기준 날씨를 불러오는 중`);
-      try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${region.lat}&longitude=${region.lon}&current=temperature_2m,relative_humidity_2m,weather_code&timezone=Asia%2FSeoul`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("weather failed");
-        const data = await response.json();
-        const current = data.current;
-        if (ignored) return;
-        setWeather({
-          text: weatherCodeText[current.weather_code] ?? "날씨 확인",
-          temp: Math.round(current.temperature_2m),
-          humidity: Math.round(current.relative_humidity_2m),
-        });
-        setWeatherSource(`${region.name} 기준 · Open-Meteo API`);
-      } catch {
-        if (ignored) return;
-        setWeather(region.fallback);
-        setWeatherSource(`${region.name} 기준 · API 실패 시 목업값`);
-      }
-    }
-
-    void loadWeather();
-
-    return () => {
-      ignored = true;
-    };
-  }, [regionKey]);
-
-  function showToast(message: string) {
-    setToast(message);
-    window.setTimeout(() => setToast(""), 1800);
-  }
-
-  function completeSetup() {
-    const today = new Date();
-    const daysElapsed = Math.max(0, today.getDate() - 1);
-    setMonthlyUsed(calculateCost(averageHours) * daysElapsed);
-    setTodayRecorded(false);
-    setLastConfirmedCost(0);
-    setView("home");
-  }
-
-  function confirmUse() {
-    if (todayRecorded) {
-      showToast("오늘 사용 기록은 이미 반영했어요.");
-      return;
-    }
-    const cost = calculateCost();
-    setMonthlyUsed((prev) => prev + cost);
-    setLastConfirmedCost(cost);
-    setTodayRecorded(true);
-    showToast("오늘 예상 냉방비를 이번 달 누적 사용액에 반영했어요.");
-  }
-
-  function undoUse() {
-    if (lastConfirmedCost <= 0) {
-      showToast("되돌릴 사용 기록이 없어요.");
-      return;
-    }
-    setMonthlyUsed((prev) => Math.max(0, prev - lastConfirmedCost));
-    setLastConfirmedCost(0);
-    setTodayRecorded(false);
-    showToast("방금 반영한 사용 기록을 되돌렸어요.");
-  }
-
-  function usageMessage() {
-    if (numbers.dailyAverage < 1500) return "아직은 낮은 사용 패턴이에요.";
-    if (numbers.dailyAverage < 3000) return "냉방비가 하루 단위로 꾸준히 쌓이고 있어요.";
-    return "최근 패턴이면 월말 냉방비가 크게 쌓일 수 있어요.";
-  }
-
+function Setup({
+  initial,
+  onSave,
+  onCancel,
+}: {
+  initial: Settings;
+  onSave: (s: Settings) => void;
+  onCancel: () => void;
+}) {
+  const [settings, setSettings] = useState(initial);
+  const [room, setRoom] = useState(String(initial.room));
+  const [error, setError] = useState("");
   return (
-    <main className={`app-shell ${view === "welcome" ? "welcome-mode" : ""}`}>
-      {view !== "welcome" && (
-        <header className="topbar">
-          <strong>냉방비 미리보기</strong>
-          <button type="button" className="mini-action" onClick={() => setView("setup")}>
-            설정 수정
-          </button>
-        </header>
+    <form
+      className="stack"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const next = { ...settings, room: Number(room) };
+        if (!room.trim() || !validSettings(next)) {
+          setError("방 크기는 1~60평, 소수점 한 자리까지 입력해 주세요.");
+          return;
+        }
+        onSave(next);
+      }}
+    >
+      <div>
+        <p className="eyebrow">우리 집 냉방 설정</p>
+        <h1>
+          어떤 공간에서
+          <br />
+          사용하시나요?
+        </h1>
+        <p className="muted">설정을 바꿔도 이전 기록의 금액은 유지돼요.</p>
+      </div>
+      <label>
+        방 크기 (평)
+        <input
+          type="number"
+          min="1"
+          max="60"
+          step="0.1"
+          required
+          value={room}
+          onChange={(e) => setRoom(e.target.value)}
+          aria-describedby="room-help"
+        />
+      </label>
+      <small id="room-help">1~60평 · 소수점 한 자리까지</small>
+      <label>
+        에어컨 종류
+        <select
+          aria-label="에어컨 종류"
+          value={settings.ac}
+          onChange={(e) =>
+            setSettings({ ...settings, ac: e.target.value as AcType })
+          }
+        >
+          {Object.entries(acLabels).map(([key, label]) => (
+            <option value={key} key={key}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        지역
+        <select
+          aria-label="지역"
+          value={settings.region}
+          onChange={(e) =>
+            setSettings({ ...settings, region: e.target.value as RegionKey })
+          }
+        >
+          {Object.entries(regions).map(([key, r]) => (
+            <option value={key} key={key}>
+              {r.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        평균 사용시간 <strong>{settings.averageHours.toFixed(1)}시간</strong>
+        <input
+          type="range"
+          min="0"
+          max="12"
+          step="0.5"
+          value={settings.averageHours}
+          onChange={(e) =>
+            setSettings({ ...settings, averageHours: Number(e.target.value) })
+          }
+        />
+      </label>
+      <p className="note">
+        기록하지 않은 지난 날짜는 이 시간과 냉방 모드로 자동 추정해요. 과거 실제
+        날씨는 반영하지 않아요.
+      </p>
+      {error && (
+        <p role="alert" className="error">
+          {error}
+        </p>
       )}
-
-      {view === "welcome" && (
-        <section className="welcome-screen">
-          <div className="welcome-hero">
-            <div className="welcome-icon" aria-hidden>
-              ❄
-            </div>
-            <h1>
-              오늘 에어컨 이만큼 써도
-              <br />
-              전기세 괜찮을까?
-            </h1>
-            <p>
-              이번 달 냉방비가
-              <br />
-              얼마나 쌓이는지 알려드려요
-            </p>
-          </div>
-          <button type="button" className="primary" onClick={() => setView("setup")}>
-            시작하기
-          </button>
-        </section>
-      )}
-
-      {view === "setup" && (
-        <section className="setup-screen">
-          <div className="setup-content">
-            <h1 className="page-title">기본 환경 설정</h1>
-
-            <section className="field-section">
-              <h2>방 크기</h2>
-              <div className="chips">
-                {[
-                  [5, "5평 이하"],
-                  [7, "6~8평"],
-                  [10.5, "9~12평"],
-                  [14, "13평 이상"],
-                ].map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={`chip ${room === value && !customRoomOpen ? "selected" : ""}`}
-                    onClick={() => {
-                      setRoom(Number(value));
-                      setCustomRoomOpen(false);
-                    }}
-                  >
-                    {label}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  className={`chip ghost wide ${customRoomOpen ? "selected" : ""}`}
-                  onClick={() => setCustomRoomOpen(true)}
-                >
-                  직접 입력
-                </button>
-              </div>
-              {customRoomOpen && (
-                <input
-                  className="custom-input"
-                  inputMode="decimal"
-                  max={60}
-                  min={1}
-                  step={0.5}
-                  type="number"
-                  value={room}
-                  onChange={(event) => {
-                    const value = Number(event.target.value);
-                    if (value > 0) setRoom(value);
-                  }}
-                />
-              )}
-            </section>
-
-            <section className="field-section">
-              <h2>에어컨 타입</h2>
-              <div className="chips">
-                {(Object.keys(acLabel) as AcType[]).map((key) => (
-                  <button
-                    key={key}
-                    type="button"
-                    className={`chip ${ac === key ? "selected" : ""} ${key === "unknown" ? "ghost" : ""}`}
-                    onClick={() => setAc(key)}
-                  >
-                    {acLabel[key]}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section className="field-section setup-average">
-              <h2>최근 일주일간 하루 평균 몇 시간 트셨나요?</h2>
-              <p>이번 달 누적 사용액을 추정하기 위해 필요해요.</p>
-              <div className="range-value">
-                <span>0시간</span>
-                <strong>{formatHours(averageHours)}시간</strong>
-                <span>12시간+</span>
-              </div>
-              <input
-                className="range"
-                max={12}
-                min={0}
-                step={0.5}
-                type="range"
-                value={averageHours}
-                onChange={(event) => setAverageHours(Number(event.target.value))}
-                style={{
-                  background: `linear-gradient(to right, ${BLUE} 0%, ${BLUE} ${
-                    (averageHours / 12) * 100
-                  }%, #d1d6de ${(averageHours / 12) * 100}%, #d1d6de 100%)`,
-                }}
-              />
-            </section>
-          </div>
-          <button type="button" className="primary" onClick={completeSetup}>
-            설정 완료
-          </button>
-        </section>
-      )}
-
-      {view === "home" && (
-        <section className="home-screen">
-          <div className="today-panel">
-            <section className="weather-card">
-              <div className="card-head">
-                <span>오늘의 날씨</span>
-                <select value={regionKey} onChange={(event) => setRegionKey(event.target.value as RegionKey)}>
-                  {(Object.keys(regionMap) as RegionKey[]).map((key) => (
-                    <option key={key} value={key}>
-                      {regionMap[key].name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="weather-main">
-                <span aria-hidden>{weatherEmoji(weather.text, weather.temp)}</span>
-                <strong>{weather.temp}℃</strong>
-                <em>|</em>
-                <b>습도 {weather.humidity}%</b>
-              </div>
-              <small>{weatherSource}</small>
-            </section>
-
-            <section className="usage-card">
-              <h2>오늘은 얼마나 켤까요?</h2>
-              <strong className="hours-display">{formatHours(hours)}시간</strong>
-              <input
-                className="range"
-                max={12}
-                min={0}
-                step={0.5}
-                type="range"
-                value={hours}
-                onChange={(event) => setHours(Number(event.target.value))}
-                style={{
-                  background: `linear-gradient(to right, ${BLUE} 0%, ${BLUE} ${(hours / 12) * 100}%, #e5e8eb ${
-                    (hours / 12) * 100
-                  }%, #e5e8eb 100%)`,
-                }}
-              />
-              <div className="range-labels">
-                <span>0</span>
-                <span>4</span>
-                <span>8</span>
-                <span>12시간</span>
-              </div>
-              <p className="today-cost">
-                예상: <strong>{formatApproxWon(numbers.todayCost)}</strong>
-              </p>
-
-              <h3>사용 모드</h3>
-              <div className="chips three">
-                {[
-                  ["cool", "냉방"],
-                  ["dry", "제습"],
-                  ["sleep", "취침"],
-                ].map(([key, label]) => (
-                  <button
-                    key={key}
-                    type="button"
-                    className={`chip mode-chip ${mode === key ? "selected" : ""}`}
-                    onClick={() => setMode(key as Mode)}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <p className="state-copy">{usageMessage()}</p>
-            <div className="confirm-row">
-              <button type="button" className="primary" onClick={confirmUse}>
-                오늘 사용 기록에 반영
-              </button>
-              <button type="button" className="secondary" onClick={undoUse}>
-                되돌리기
-              </button>
-            </div>
-            <p className="notice">
-              실제 전기요금은 누진제, 집 전체 사용량, 에어컨 소비전력, 설정 온도, 단열 상태에 따라 달라질 수
-              있어요. 이 결과는 냉방비 관리를 위한 참고용 예상 금액이에요.
-            </p>
-          </div>
-
-          <section className="monthly-panel">
-            <div className="cumulative-title">이번 달 누적 사용 추정액</div>
-            <div className="cumulative-amount">{formatWon(numbers.reflected)}</div>
-            <div className="cumulative-caption">
-              오늘 포함 지난날 평균 {formatWon(numbers.dailyAverage)}씩 쌓이고 있어요
-            </div>
-            <div className="cumulative-bar">
-              <div className="cumulative-fill" style={{ width: `${Math.min(100, numbers.monthProgress)}%` }} />
-              <div className="cumulative-dot" />
-            </div>
-            <div className="cumulative-foot">
-              <span>{numbers.dayOfMonth}일째</span>
-              <span>이대로면 월말 약 {formatWon(numbers.monthProjection)}</span>
-            </div>
-          </section>
-        </section>
-      )}
-
-      {toast && <div className="toast">{toast}</div>}
-    </main>
+      <button className="primary" type="submit">
+        설정 저장
+      </button>
+      <button type="button" className="secondary" onClick={onCancel}>
+        돌아가기
+      </button>
+    </form>
   );
 }
 
-export default App;
+function download(raw: string) {
+  const url = URL.createObjectURL(
+    new Blob([raw], { type: "application/json" }),
+  );
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "cooling-cost-preview-backup.json";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export default function App() {
+  const store = useLedger();
+  const { data } = store;
+  const today = data?.draft.date ?? koreaDate();
+  const weather = useWeather(data?.settings.region ?? "seoul", today);
+  const [view, setView] = useState<"home" | "setup" | "history">("home");
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [message, setMessage] = useState("");
+  const [recoveryAgreed, setRecoveryAgreed] = useState(false);
+  const preview = data
+    ? calculateCost(
+        data.settings,
+        data.draft.hours,
+        data.draft.mode,
+        weather.weather,
+      )
+    : 0;
+  const summary = data
+    ? monthlySummary(data, monthOf(today), today, preview)
+    : null;
+  const month = selectedMonth || monthOf(today);
+  const history = data ? monthlySummary(data, month, today, preview) : null;
+  const saved = data?.records[today];
+  const months = data
+    ? [...new Set([monthOf(today), ...Object.keys(data.records).map(monthOf)])]
+        .sort()
+        .reverse()
+    : [];
+  function success(ok: boolean, text: string) {
+    setMessage(
+      ok ? text : "변경사항을 저장하지 못했어요. 아래 안내를 확인해 주세요.",
+    );
+  }
+
+  return (
+    <main className="app-shell">
+      <header className="topbar">
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            setView("home");
+          }}
+        >
+          냉방비 미리보기<span className="version">v0.2</span>
+        </a>
+        {data && !store.error && (
+          <button
+            className="text-button"
+            onClick={() => {
+              setMessage("");
+              setView("setup");
+            }}
+          >
+            설정
+          </button>
+        )}
+      </header>
+      {store.error ? (
+        <section className="stack recovery" aria-labelledby="recovery-title">
+          <p className="eyebrow">저장 확인이 필요해요</p>
+          <h1 id="recovery-title">
+            기록을 보호하기 위해
+            <br />
+            변경을 멈췄어요.
+          </h1>
+          <p role="alert" className="error">
+            {store.error}
+          </p>
+          <p>
+            저장 공간이나 브라우저 권한을 확인하고 다시 불러와 주세요.
+            마지막으로 저장된 데이터는 자동으로 덮어쓰지 않아요.
+          </p>
+          <button
+            className="primary"
+            onClick={() => {
+              store.reload();
+              setMessage("");
+            }}
+          >
+            다시 불러오기
+          </button>
+          {store.raw !== null && (
+            <>
+              <button
+                className="secondary"
+                onClick={() => download(store.raw!)}
+              >
+                원본 데이터 내보내기
+              </button>
+              <label className="check">
+                <input
+                  type="checkbox"
+                  checked={recoveryAgreed}
+                  onChange={(e) => setRecoveryAgreed(e.target.checked)}
+                />
+                현재 데이터를 별도 백업하고 새로 시작할게요.
+              </label>
+              <button
+                className="text-button danger"
+                disabled={!recoveryAgreed}
+                onClick={() => {
+                  store.reset();
+                  setView("home");
+                  setRecoveryAgreed(false);
+                }}
+              >
+                원본 백업 후 다시 시작
+              </button>
+            </>
+          )}
+        </section>
+      ) : view === "setup" ? (
+        <Setup
+          key={data ? JSON.stringify(data.settings) : "new"}
+          initial={data?.settings ?? defaultSettings}
+          onCancel={() => setView("home")}
+          onSave={(settings) => {
+            const ok = store.apply((old) =>
+              old
+                ? changeSettings(old, settings, koreaDate())
+                : createData(settings, koreaDate()),
+            );
+            if (ok) {
+              setView("home");
+              setMessage("설정을 저장했어요.");
+            }
+          }}
+        />
+      ) : !data ? (
+        <section className="welcome stack">
+          <div className="welcome-icon" aria-hidden="true">
+            ❄
+          </div>
+          <p className="eyebrow">시원함은 편하게, 냉방비는 미리</p>
+          <h1>
+            오늘의 냉방이
+            <br />한 달에 얼마나 쌓일까요?
+          </h1>
+          <p className="muted">
+            사용시간을 바꿔 비용을 비교하고,
+            <br />
+            매일의 기록을 차곡차곡 모아보세요.
+          </p>
+          <div className="feature-list">
+            <p>
+              <span>01</span>우리 집 조건으로 간단하게
+            </p>
+            <p>
+              <span>02</span>직접 기록과 자동 추정을 구분해서
+            </p>
+            <p>
+              <span>03</span>같은 브라우저에서 이어서
+            </p>
+          </div>
+          <button className="primary" onClick={() => setView("setup")}>
+            우리 집 설정하기
+          </button>
+          <p className="fine">
+            참고용 추정 서비스예요. 실제 전기요금 청구액과 다를 수 있어요.
+          </p>
+        </section>
+      ) : (
+        <>
+          <nav className="tabs" aria-label="화면 선택">
+            <button
+              aria-current={view === "home" ? "page" : undefined}
+              onClick={() => setView("home")}
+            >
+              오늘 미리보기
+            </button>
+            <button
+              aria-current={view === "history" ? "page" : undefined}
+              onClick={() => setView("history")}
+            >
+              월별 기록
+            </button>
+          </nav>
+          {view === "history" && history ? (
+            <section className="stack">
+              <div>
+                <p className="eyebrow">차곡차곡 쌓인 사용</p>
+                <h1>월별 냉방 기록</h1>
+              </div>
+              <label>
+                조회할 월
+                <select
+                  aria-label="조회할 월"
+                  value={month}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                >
+                  {months.map((m) => (
+                    <option key={m} value={m}>
+                      {m.replace("-", "년 ")}월
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="history-total">
+                <span>저장된 기록 합계</span>
+                <strong>{won(history.recorded + history.estimated)}</strong>
+                <p className="fine">
+                  직접 입력 {won(history.recorded)} · 자동 추정{" "}
+                  {won(history.estimated)}
+                  <br />
+                  오늘 미저장 예상액은 목록 합계에 포함하지 않아요.
+                </p>
+              </div>
+              <ul className="record-list">
+                {history.rows.map((row) => (
+                  <li key={row.date}>
+                    <div>
+                      <strong>{row.date}</strong>
+                      <span className={`badge ${row.kind}`}>
+                        {row.kind === "recorded" ? "직접 입력" : "자동 추정"}
+                      </span>
+                      <small>
+                        {modeLabels[row.mode]} · {row.hours.toFixed(1)}시간 ·{" "}
+                        {row.settings.room}평 ·{" "}
+                        {regions[row.settings.region].name}
+                        {row.weather
+                          ? ` · ${row.weather.source === "live" ? "조회 날씨" : row.weather.source === "cache" ? "최근 날씨" : "예시 날씨"}`
+                          : " · 중립 날씨계수"}
+                      </small>
+                    </div>
+                    <strong>{won(row.cost)}</strong>
+                  </li>
+                ))}
+              </ul>
+              {history.rows.length === 0 && (
+                <p className="note">
+                  아직 저장된 기록이 없어요. 오늘 사용량을 기록해 보세요.
+                </p>
+              )}
+              <p className="fine">
+                지난 날짜의 금액은 당시 설정으로 유지돼요. 오늘 기록은 미리보기
+                화면에서 수정하거나 취소할 수 있어요.
+              </p>
+              <button className="secondary" onClick={() => setView("home")}>
+                오늘 기록 수정하기
+              </button>
+            </section>
+          ) : (
+            summary && (
+              <section className="stack">
+                <div className="heading">
+                  <p className="eyebrow">
+                    {today.replaceAll("-", ".")} · 한국 시간
+                  </p>
+                  <h1>
+                    오늘도 시원하게,
+                    <br />
+                    부담은 미리 확인해요.
+                  </h1>
+                  <p className="muted">
+                    {data.settings.room}평 · {acLabels[data.settings.ac]} ·{" "}
+                    {regions[data.settings.region].name}
+                  </p>
+                </div>
+                <section className="summary-card" aria-labelledby="month-title">
+                  <p id="month-title">
+                    {Number(today.slice(5, 7))}월 누적 예상 냉방비
+                  </p>
+                  <strong className="big-number" data-testid="month-total">
+                    {won(summary.total)}
+                  </strong>
+                  <p className="summary-caption">
+                    {saved
+                      ? "오늘 저장한 금액까지 반영했어요"
+                      : "오늘 미저장 예상액을 포함한 미리보기예요"}
+                  </p>
+                  <dl className="breakdown">
+                    <div>
+                      <dt>직접 입력</dt>
+                      <dd>{won(summary.recorded)}</dd>
+                    </div>
+                    <div>
+                      <dt>자동 추정</dt>
+                      <dd>{won(summary.estimated)}</dd>
+                    </div>
+                    {!saved && (
+                      <div>
+                        <dt>오늘 미저장 예상</dt>
+                        <dd>{won(summary.preview)}</dd>
+                      </div>
+                    )}
+                  </dl>
+                  <div className="projection">
+                    <div>
+                      <span>하루 평균</span>
+                      <strong>{won(summary.average)}</strong>
+                    </div>
+                    <div>
+                      <span>이 추세라면 월말</span>
+                      <strong>{won(summary.projection)}</strong>
+                    </div>
+                  </div>
+                </section>
+                <section className="weather-card" aria-label="지역 날씨">
+                  <div className="row">
+                    <strong>
+                      {regions[data.settings.region].name} ·{" "}
+                      {weather.weather.text}
+                    </strong>
+                    <span>
+                      {weather.weather.temp}°C · 습도 {weather.weather.humidity}
+                      %
+                    </span>
+                  </div>
+                  <p className="fine">
+                    {weather.loading
+                      ? "날씨 조회 중 · "
+                      : weather.failed
+                        ? "날씨 조회 실패 · "
+                        : ""}
+                    {weather.weather.source === "live"
+                      ? "Open-Meteo 조회값"
+                      : weather.weather.source === "cache"
+                        ? "최근 성공값 (24시간 이내)"
+                        : "예시 날씨 사용 (실시간 아님)"}
+                    {weather.weather.fetchedAt &&
+                      ` · 조회 ${new Date(weather.weather.fetchedAt).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}`}
+                  </p>
+                  <button
+                    className="text-button"
+                    onClick={weather.retry}
+                    disabled={weather.loading}
+                  >
+                    날씨 다시 조회
+                  </button>
+                </section>
+                <section
+                  className="usage-card stack"
+                  aria-labelledby="today-title"
+                >
+                  <div className="row">
+                    <h2 id="today-title">오늘 사용량</h2>
+                    <span className={`badge ${saved ? "recorded" : ""}`}>
+                      {saved ? "기록 저장됨" : "아직 미저장"}
+                    </span>
+                  </div>
+                  <fieldset>
+                    <legend>사용 모드</legend>
+                    <div className="mode-group">
+                      {Object.entries(modeLabels).map(([key, label]) => (
+                        <button
+                          key={key}
+                          type="button"
+                          aria-pressed={data.draft.mode === key}
+                          onClick={() => {
+                            setMessage("");
+                            store.apply((old) =>
+                              changeDraft(
+                                old!,
+                                old!.draft.hours,
+                                key as Mode,
+                                koreaDate(),
+                              ),
+                            );
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <label>
+                    오늘 사용시간{" "}
+                    <strong>{data.draft.hours.toFixed(1)}시간</strong>
+                    <input
+                      type="range"
+                      min="0"
+                      max="12"
+                      step="0.5"
+                      value={data.draft.hours}
+                      onChange={(e) => {
+                        setMessage("");
+                        store.apply((old) =>
+                          changeDraft(
+                            old!,
+                            Number(e.target.value),
+                            old!.draft.mode,
+                            koreaDate(),
+                          ),
+                        );
+                      }}
+                    />
+                  </label>
+                  <div className="range-labels">
+                    <span>0시간</span>
+                    <span>12시간</span>
+                  </div>
+                  <div className="today-cost">
+                    <span>현재 입력 기준 예상액</span>
+                    <strong data-testid="today-cost">약 {won(preview)}</strong>
+                  </div>
+                  {saved && (
+                    <p className="note">
+                      월 누적에는 저장한 {won(saved.cost)}이 반영돼요. 입력을
+                      바꿨다면 수정 저장해 주세요.
+                    </p>
+                  )}
+                  <button
+                    className="primary"
+                    onClick={() =>
+                      success(
+                        store.apply((old) =>
+                          saveToday(old!, weather.weather, koreaDate()),
+                        ),
+                        saved
+                          ? "오늘 기록을 수정했어요."
+                          : "오늘 기록을 저장했어요.",
+                      )
+                    }
+                  >
+                    {saved ? "오늘 기록 수정 저장" : "오늘 기록 저장"}
+                  </button>
+                  {saved && (
+                    <button
+                      className="secondary"
+                      onClick={() =>
+                        success(
+                          store.apply((old) => cancelToday(old!, koreaDate())),
+                          "오늘 기록을 취소했어요. 미저장 예상액으로 돌아왔어요.",
+                        )
+                      }
+                    >
+                      오늘 기록 취소
+                    </button>
+                  )}
+                </section>
+                <details>
+                  <summary>계산 기준과 데이터 보관 안내</summary>
+                  <p>
+                    소비전력 × 사용시간 × 모드·방 크기·날씨계수 × 260원으로
+                    추정해요. 누진제, 다른 가전, 기본요금·세금은 포함하지
+                    않아요. 제습·취침 모드의 절감률은 가정이며 제품별 실제
+                    효율과 달라요.
+                  </p>
+                  <p>
+                    자동 추정은 평균 사용시간과 냉방 모드, 중립 날씨계수를
+                    사용해요. 월말 예상액은 이번 달 일평균을 월 전체 일수로
+                    환산한 값이에요.
+                  </p>
+                  <p>
+                    설정·기록은 이 기기의 같은 브라우저와 주소에만 저장돼요.
+                    브라우저 데이터 삭제 시 사라질 수 있고, 다른 기기와
+                    동기화되지 않아요.
+                  </p>
+                  <p>
+                    날씨:{" "}
+                    <a
+                      href="https://open-meteo.com/"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Open-Meteo
+                    </a>{" "}
+                    ·{" "}
+                    <a
+                      href="https://creativecommons.org/licenses/by/4.0/"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      CC BY 4.0
+                    </a>
+                  </p>
+                </details>
+              </section>
+            )
+          )}
+          <p className="status" role="status" aria-live="polite">
+            {message}
+          </p>
+        </>
+      )}
+      <footer>냉방비 미리보기 · 참고용 추정 MVP</footer>
+    </main>
+  );
+}

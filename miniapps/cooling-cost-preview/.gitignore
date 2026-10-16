@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.granite/
+*.ait
+*.log
+.env*
+!.env.example
+.vscode/
+test-results/
+*.tsbuildinfo

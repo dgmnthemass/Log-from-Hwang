@@ -1,0 +1,101 @@
+{
+  "originalVersion": "0.1.0",
+  "verifiedOn": "2026-10-16",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 679,
+      "sha256": "ca6bcfbdeb2ab928e851126a09bc2fdf6398b291d379844b5d434bf438b9ea35"
+    },
+    {
+      "path": "aircon-safe-budget-monthly-mockup.html",
+      "bytes": 40782,
+      "sha256": "6996fca7a866a98938fd2d1f3b096e48b27692592cca87c1f961179a517559be"
+    },
+    {
+      "path": "docs/requirements-v0.1.md",
+      "bytes": 15881,
+      "sha256": "79e81e3e3ea5bfb3603329d9f445c4a57290dc707552c2b907d59f9c4c14be91"
+    },
+    {
+      "path": "eslint.config.js",
+      "bytes": 734,
+      "sha256": "dc00c7db700d03834d04a172ea709593ae5ef1bc750eb55dfc521a60d9e1baa0"
+    },
+    {
+      "path": "granite.config.ts",
+      "bytes": 441,
+      "sha256": "6d7c8eb6140a424d864f42a89f658d803004e997b3aa02239f5e6489394a0ac7"
+    },
+    {
+      "path": "index.html",
+      "bytes": 294,
+      "sha256": "6277cd80609325f2517ac2fd2d393ae7ab2dcc6923d2f65262026930830fcc65"
+    },
+    {
+      "path": "package.json",
+      "bytes": 931,
+      "sha256": "0a04955bc27336979b28f68c83aff97b4448e3eb6d219a5d09c2af35e4f9ba8f"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 568744,
+      "sha256": "8388a3477c698416777819648527ee1a410e6b01096c6e3074e533a71280339e"
+    },
+    {
+      "path": "pnpm-workspace.yaml",
+      "bytes": 174,
+      "sha256": "8643c3ba888f4b0b2243d1094c1ede917518488ddfee8b17e629100676d45f45"
+    },
+    {
+      "path": "public/appsintoss-logo.png",
+      "bytes": 307574,
+      "sha256": "ab3e3a76320c7c7ecabdc44b7eee3264c9da9bd73582ef6e1133240bae632ed8"
+    },
+    {
+      "path": "src/App.css",
+      "bytes": 8605,
+      "sha256": "b00da33b0fde99c9d44a1e130edf4f5425a87006e34fa59b4ee5e226c81ec192"
+    },
+    {
+      "path": "src/App.tsx",
+      "bytes": 17432,
+      "sha256": "1ae96c0e2a7d570f8372857c847acce7846c6c46d9b8329efeef43e714796520"
+    },
+    {
+      "path": "src/index.css",
+      "bytes": 315,
+      "sha256": "64e7338bda59cf336472c1cf3255ac7210a24d6d85d573deb3c1658596048f59"
+    },
+    {
+      "path": "src/main.tsx",
+      "bytes": 443,
+      "sha256": "2c7a42525debac906b9fa5256fe363f7281fd7d92f6450065ecea4c9c88eb761"
+    },
+    {
+      "path": "src/vite-env.d.ts",
+      "bytes": 133,
+      "sha256": "e075b0ec3aefcf44da008436816c792f7d9e784adfed35fafacbfed6e503e639"
+    },
+    {
+      "path": "tsconfig.app.json",
+      "bytes": 622,
+      "sha256": "d5c573ef71c04b1c20b329d797e318caba9a2fb22f39102a29aece7bb9948e6e"
+    },
+    {
+      "path": "tsconfig.json",
+      "bytes": 119,
+      "sha256": "770b4140bbb581e2dfd9ea9946ffc9c75a1d86ba7d2db5f77c83e37cbdf9d808"
+    },
+    {
+      "path": "tsconfig.node.json",
+      "bytes": 550,
+      "sha256": "5712f7a868474d9a78719c81abf6a7d63a74464691ebe48495d93321f9f8ac24"
+    }
+  ],
+  "ait": {
+    "path": "cooling-cost-preview.ait",
+    "bytes": 4445621,
+    "sha256": "b0f1d95ff53d0bef85cb0c555fbbb43b7db9a301cda0b8e5ec93a95286daa0c6"
+  }
+}
